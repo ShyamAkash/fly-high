@@ -18,6 +18,9 @@ gameOver=False
 menu=True
 
 plane_sound=pygame.mixer.Sound(os.path.join('assets', 'plane.mp3'))
+plane_sound.set_volume(0.2)
+music=pygame.mixer.music.load(os.path.join('assets', 'music.mp3'))
+pygame.mixer.music.set_volume(0.1)
 
 bg_img=pygame.image.load(os.path.join('assets', 'bg.png'))
 
@@ -104,6 +107,8 @@ while menu:
     pygame.display.update()
 
 while running:
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.play()
     clock.tick(60)
     screen.blit(bg_img, (0,0))
     for event in pygame.event.get():
@@ -126,6 +131,7 @@ while running:
     draw_score()
 
     if gameOver:
+        pygame.mixer.music.stop()
         screen.blit(go, (0, 0))
         score_text=SCORE_FONT_END.render(f'Score: {score}', 1, (255, 255, 255))
         screen.blit(score_text, (400-score_text.get_width()/2, 400))
