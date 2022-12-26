@@ -23,7 +23,8 @@ gamePaused=True
 flap_sound=pygame.mixer.Sound(os.path.join('assets', 'flap.wav'))
 flap_sound.set_volume(0.6)
 music=pygame.mixer.music.load(os.path.join('assets', 'music.mp3'))
-pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.set_volume(0.2)
+crash_sound=pygame.mixer.Sound(os.path.join('assets', 'crash.wav'))
 
 bg_img=pygame.image.load(os.path.join('assets', 'bg.png'))
 
@@ -46,6 +47,9 @@ plane=pygame.Rect(300, 150, 30, 20)
 
 menu=pygame.image.load(os.path.join('assets', 'menu.png'))
 go=pygame.image.load(os.path.join('assets', 'go.png'))
+
+pygame.display.set_caption('Fly High')
+pygame.display.set_icon(plane_img_down)
 
 def wait():
     while True:
@@ -152,6 +156,7 @@ while running:
         wait()
         gamePaused=False
     if gameOver:
+        crash_sound.play()
         pygame.mixer.music.stop()
         screen.blit(go, (0, 0))
         score_text=SCORE_FONT_END.render(f'Score: {score}', 1, (255, 255, 255))
