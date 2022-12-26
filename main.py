@@ -21,7 +21,7 @@ num=0
 gamePaused=True
 
 flap_sound=pygame.mixer.Sound(os.path.join('assets', 'flap.wav'))
-flap_sound.set_volume(0.6)
+flap_sound.set_volume(0.7)
 music=pygame.mixer.music.load(os.path.join('assets', 'music.mp3'))
 pygame.mixer.music.set_volume(0.2)
 crash_sound=pygame.mixer.Sound(os.path.join('assets', 'crash.wav'))
@@ -162,6 +162,7 @@ while running:
         score_text=SCORE_FONT_END.render(f'Score: {score}', 1, (255, 255, 255))
         screen.blit(score_text, (400-score_text.get_width()/2, 400))
         pygame.display.update()
+        wait()
     else:
         pygame.display.update()
 
