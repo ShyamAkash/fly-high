@@ -12,13 +12,16 @@ SCORE_FONT_END=pygame.font.SysFont('agency fb', 100, bold=True)
 screen=pygame.display.set_mode((800, 600))
 clock=pygame.time.Clock()
 running=True
-jump=False
+flap=False
 score=0
 gameOver=False
 menu=True
+vel=7
+num=0
+gamePaused=True
 
-plane_sound=pygame.mixer.Sound(os.path.join('assets', 'plane.mp3'))
-plane_sound.set_volume(0.2)
+flap_sound=pygame.mixer.Sound(os.path.join('assets', 'flap.wav'))
+flap_sound.set_volume(0.6)
 music=pygame.mixer.music.load(os.path.join('assets', 'music.mp3'))
 pygame.mixer.music.set_volume(0.1)
 
@@ -37,12 +40,20 @@ score_lines=[]
 
 plane_img=pygame.image.load(os.path.join('assets', 'plane.png'))
 plane_img=pygame.transform.scale(plane_img, (40, 30))
-plane_img_up=pygame.transform.rotate(plane_img, 10)
+plane_img_up=pygame.transform.rotate(plane_img, 20)
 plane_img_down=pygame.transform.rotate(plane_img, -10)
-plane=pygame.Rect(200, 300, 30, 20)
+plane=pygame.Rect(300, 150, 30, 20)
 
 menu=pygame.image.load(os.path.join('assets', 'menu.png'))
 go=pygame.image.load(os.path.join('assets', 'go.png'))
+
+def wait():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or (event.type == pygame.MOUSEBUTTONDOWN):
+                return
 
 def draw_platform():
     global platform_x
@@ -57,8 +68,8 @@ def draw_pipes():
     global score
     for pipe in pipes_list:
         screen.blit(pipe_op_img, (pipe.x, pipe.y))
-        screen.blit(pipe_img, (pipe.x, pipe.y+400))
-        pipe2=pygame.Rect(pipe.x, pipe.y+400, 100, 290)
+        screen.blit(pipe_img, (pipe.x, pipe.y+430))
+        pipe2=pygame.Rect(pipe.x, pipe.y+430, 100, 290)
         pipe.x-=2
         if pipe.x<=400 and len(pipes_list)<2:
             pipes_list.append(pygame.Rect(800, random.randint(-150, 0), 100, 290))
@@ -75,19 +86,24 @@ def draw_pipes():
             score_lines.remove(line)
 
 def draw_plane():
+    global vel
+    global num
     global gameOver
     global plane_img
-    global jump
+    global flap
     screen.blit(plane_img, (plane.x, plane.y))
-    if jump and plane.y-20>=0:
-        plane_sound.play()
+    if flap and not gameOver and plane.y-5>=0:
+        flap_sound.play()
+        vel=-7
+        flap=False
+        num=28
+    if num>=1:
         plane_img=plane_img_up
-        plane.y-=3
-        jump=False
+        vel+=0.5
+        num-=1
     else:
-        plane_sound.stop()
         plane_img=plane_img_down
-        plane.y += 3
+    plane.y += vel
     if plane.y+15>=536:
         gameOver=True
 
@@ -96,6 +112,8 @@ def draw_score():
     screen.blit(score_text, (10, 10))
 
 while menu:
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.play()
     screen.blit(menu, (0,0))
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
@@ -114,11 +132,8 @@ while running:
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
-    
-    keys_pressed=pygame.key.get_pressed()
-    if keys_pressed[pygame.K_SPACE]:
-        plane_img=plane_img_up
-        jump=True
+        if (event.type==pygame.MOUSEBUTTONDOWN) or (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE):
+            flap=True
 
     if len(pipes_list)<1:
         pipe=pygame.Rect(800, random.randint(-150, 0), 100, 290)
@@ -130,6 +145,12 @@ while running:
     draw_platform()
     draw_score()
 
+    if gamePaused:
+        text=SCORE_FONT.render("Press 'SPACE' or 'LMB' to Start", 1, (0, 0, 0))
+        screen.blit(text, (200, 200))
+        pygame.display.update()
+        wait()
+        gamePaused=False
     if gameOver:
         pygame.mixer.music.stop()
         screen.blit(go, (0, 0))
