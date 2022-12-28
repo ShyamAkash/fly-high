@@ -8,6 +8,7 @@ pygame.mixer.init()
 
 SCORE_FONT=pygame.font.SysFont('agency fb', 20)
 SCORE_FONT_END=pygame.font.SysFont('agency fb', 100, bold=True)
+END_SCREEN=pygame.font.SysFont('arial', 30)
 
 screen=pygame.display.set_mode((800, 600))
 clock=pygame.time.Clock()
@@ -51,12 +52,22 @@ go=pygame.image.load(os.path.join('assets', 'go.png'))
 pygame.display.set_caption('Fly High')
 pygame.display.set_icon(plane_img_down)
 
-def wait():
+def wait_start():
+    pygame.init()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or (event.type == pygame.MOUSEBUTTONDOWN):
+                return
+
+def wait_end():
+    pygame.init()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 return
 
 def draw_platform():
@@ -112,7 +123,7 @@ def draw_plane():
         gameOver=True
 
 def draw_score():
-    score_text=SCORE_FONT.render(f"Score: {score}", 1, (0,0,0))
+    score_text=SCORE_FONT.render(f"Score: {score}{' '*75} 'P': Pause", 1, (0,0,0))
     screen.blit(score_text, (10, 10))
 
 while menu:
@@ -138,6 +149,8 @@ while running:
             running=False
         if (event.type==pygame.MOUSEBUTTONDOWN) or (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE):
             flap=True
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_p):
+            gamePaused=True
 
     if len(pipes_list)<1:
         pipe=pygame.Rect(800, random.randint(-150, 0), 100, 290)
@@ -153,17 +166,19 @@ while running:
         text=SCORE_FONT.render("Press 'SPACE' or 'LMB' to Start", 1, (0, 0, 0))
         screen.blit(text, (200, 200))
         pygame.display.update()
-        wait()
+        wait_start()
         gamePaused=False
     if gameOver:
         crash_sound.play()
         pygame.mixer.music.stop()
         screen.blit(go, (0, 0))
         score_text=SCORE_FONT_END.render(f'Score: {score}', 1, (255, 255, 255))
+        end_screen_text=END_SCREEN.render("'ESC' - Quit", 1, (255, 255, 255))
         screen.blit(score_text, (400-score_text.get_width()/2, 400))
+        screen.blit(end_screen_text, (400-end_screen_text.get_width()/2, 550))
         pygame.display.update()
-        wait()
-    else:
-        pygame.display.update()
+        wait_end()
+        running=False
+    pygame.display.update()
 
 pygame.quit()
